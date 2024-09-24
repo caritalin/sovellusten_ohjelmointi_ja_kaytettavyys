@@ -5,17 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.example.lokalisointi.ui.theme.LokalisointiTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,7 +21,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             LokalisointiTheme {
-                MyScreen()
+                BloodPressureScreen() // Use BloodPressureScreen directly
             }
         }
     }
@@ -31,29 +29,17 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview(showBackground = true)
-fun MyScreen() {
+fun BloodPressureScreen() {
+    var systolic by remember { mutableStateOf("") }
+    var diastolic by remember { mutableStateOf("") }
+    var interpretation by remember { mutableStateOf("") }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(id = R.string.title_oma_sovellus), color = Color.White) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF6200EE) // Tumman violetti
-                )
+                title = { Text(stringResource(id = R.string.title_blood_pressure), color = Color.White) },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Blue)
             )
-        },
-        bottomBar = {
-            Button(
-                onClick = { /*TODO: Add refresh action*/ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF03DAC5) // Vihreä
-                )
-            ) {
-                Text(text = stringResource(id = R.string.button_get_weather), color = Color.White)
-            }
         },
         content = { paddingValues ->
             Surface(
@@ -61,31 +47,55 @@ fun MyScreen() {
                     .fillMaxSize()
                     .padding(paddingValues),
                 shape = RoundedCornerShape(16.dp),
-                color = Color(0xFFBB86FC) // Vaalean violetti
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues),
+                        .padding(16.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = stringResource(id = R.string.star_icon_description),
-                        modifier = Modifier.size(64.dp),
-                        tint = Color.Yellow // Keltainen
+                    TextField(
+                        value = systolic,
+                        onValueChange = { systolic = it },
+                        label = { Text(stringResource(id = R.string.systolic_value)) },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = stringResource(id = R.string.weather_text), fontSize = 32.sp, color = Color.White)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = stringResource(id = R.string.example_text_1), color = Color.White)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = stringResource(id = R.string.example_text_2), color = Color.White)
-                    Text(text = stringResource(id = R.string.description_text), color = Color.White)
-                    Text(text = stringResource(id = R.string.description_text_2), color = Color.White)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextField(
+                        value = diastolic,
+                        onValueChange = { diastolic = it },
+                        label = { Text(stringResource(id = R.string.diastolic_value)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            interpretation = interpretBloodPressure(systolic.toIntOrNull(), diastolic.toIntOrNull())
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(id = R.string.evaluate_button))
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = interpretation,
+                        fontSize = 24.sp,
+                        color = Color.Blue
+                    )
                 }
             }
         }
     )
+}
+
+fun interpretBloodPressure(systolic: Int?, diastolic: Int?): String {
+    return when {
+        systolic == null || diastolic == null -> "Anna kelvolliset arvot"
+        systolic < 90 || diastolic < 60 -> "Matala verenpaine"
+        systolic in 90..120 && diastolic in 60..80 -> "Hyvä verenpaine"
+        systolic in 121..139 || diastolic in 81..89 -> "Lievästi koholla"
+        systolic >= 140 || diastolic >= 90 -> "Koholla"
+        else -> "Tuntematon virhe"
+    }
 }
