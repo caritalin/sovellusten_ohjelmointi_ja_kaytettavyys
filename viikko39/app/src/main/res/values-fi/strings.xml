@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Oma Sovellus</string>
+    <string name="title_oma_sovellus">Oma Sovellus</string>
+    <string name="button_get_weather">Hae sää</string>
+    <string name="weather_text">Jetpack Compose</string>
+    <string name="example_text_1">Esimerkki tekstistä</string>
+    <string name="example_text_2">Ja tässä hieman lisää tekstiä</string>
+    <string name="description_text">Tehtävänä on tuoda tähän sovellukseen teema,</string>
+    <string name="description_text_2">jonka perusteella asetetaan värit, fontit yms. ulkoasuun</string>
+    <string name="star_icon_description">Tähti-ikoni</string>
+</resources>

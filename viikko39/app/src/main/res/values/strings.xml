@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="title_oma_sovellus">My Application</string>
+    <string name="button_get_weather">Get Weather Data</string>
+    <string name="weather_text">Jetpack Compose</string>
+    <string name="example_text_1">Example text</string>
+    <string name="example_text_2">And here is some more text</string>
+    <string name="description_text">The task is to apply a theme to this application</string>
+    <string name="description_text_2">based on which colors, fonts, etc., are set for the UI</string>
+    <string name="star_icon_description">Star Icon</string>
+</resources>
