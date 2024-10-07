@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/openBrowserButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Avaa internetselain" />
+
+    <Button
+        android:id="@+id/showLocationButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Näytä sijainti kartalla" />
+
+    <Button
+        android:id="@+id/setAlarmButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aseta hälytys" />
+
+    <Button
+        android:id="@+id/dialPhoneButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Soita puhelu" />
+
+</LinearLayout>
