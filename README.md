@@ -1,1 +1,0 @@
-# sovellusten_ohjelmointi_ja_kaytettavyys
