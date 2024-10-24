@@ -3,6 +3,7 @@ package com.example.harjoitus1
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,8 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.*
 
-// Data class for Restaurant
 data class Restaurant(
     val name: String,
     val address: String,
@@ -20,27 +22,9 @@ data class Restaurant(
     val cuisine: String
 )
 
-// Main Activity class
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            MaterialTheme {
-                Surface {
-                    RestaurantListView() // Call the RestaurantListView composable
-                }
-            }
-        }
-    }
-}
-
-// Restaurant List View Composable
-@Composable
-fun RestaurantListView() {
-    var searchQuery by remember { mutableStateOf("") }
-
     // Sample restaurant data
-    val restaurants = listOf(
+    private val restaurants = listOf(
         Restaurant("The Gourmet Kitchen", "123 Food St.", 4.5, "Italian"),
         Restaurant("Sushi World", "456 Sushi Ave.", 4.8, "Japanese"),
         Restaurant("Taco Paradise", "789 Taco Blvd.", 4.2, "Mexican"),
@@ -68,6 +52,33 @@ fun RestaurantListView() {
         Restaurant("The Vegan Joint", "753 Plant Ave.", 4.7, "Vegan")
     )
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            // Setting up Navigation
+            val navController = rememberNavController()
+            NavHost(navController, startDestination = "restaurant_list") {
+                composable("restaurant_list") { RestaurantListView(navController, restaurants) }
+                composable("restaurant_detail/{restaurantName}") { backStackEntry ->
+                    val restaurantName = backStackEntry.arguments?.getString("restaurantName")
+                    restaurantName?.let { name ->
+                        val restaurant = getRestaurantByName(name)
+                        restaurant?.let { RestaurantDetailView(it) }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getRestaurantByName(name: String): Restaurant? {
+        return restaurants.find { it.name == name }
+    }
+}
+
+@Composable
+fun RestaurantListView(navController: NavController, restaurants: List<Restaurant>) {
+    var searchQuery by remember { mutableStateOf("") }
+
     // Filter restaurants based on search query
     val filteredRestaurants = restaurants.filter {
         it.name.contains(searchQuery, ignoreCase = true)
@@ -88,7 +99,9 @@ fun RestaurantListView() {
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(filteredRestaurants) { restaurant ->
-                    RestaurantItem(restaurant)
+                    RestaurantItem(restaurant) {
+                        navController.navigate("restaurant_detail/${restaurant.name}")
+                    }
                     Spacer(modifier = Modifier.height(8.dp)) // Add space between items
                 }
             }
@@ -96,11 +109,10 @@ fun RestaurantListView() {
     }
 }
 
-// Restaurant Item Composable
 @Composable
-fun RestaurantItem(restaurant: Restaurant) {
+fun RestaurantItem(restaurant: Restaurant, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -111,9 +123,24 @@ fun RestaurantItem(restaurant: Restaurant) {
     }
 }
 
-// Preview for the Restaurant List
+@Composable
+fun RestaurantDetailView(restaurant: Restaurant) {
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "Details for ${restaurant.name}", style = MaterialTheme.typography.titleLarge)
+            Text(text = "Address: ${restaurant.address}")
+            Text(text = "Cuisine: ${restaurant.cuisine}")
+            Text(text = "Rating: ${restaurant.rating}")
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
-    RestaurantListView()
+    val navController = rememberNavController()
+    RestaurantListView(navController, listOf(
+        Restaurant("The Gourmet Kitchen", "123 Food St.", 4.5, "Italian"),
+        Restaurant("Sushi World", "456 Sushi Ave.", 4.8, "Japanese")
+    ))
 }
