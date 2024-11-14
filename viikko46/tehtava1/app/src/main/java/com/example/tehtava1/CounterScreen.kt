@@ -1,33 +1,60 @@
 package com.example.tehtava1
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.material3.Text
+import androidx.compose.ui.unit.dp
+import com.example.tehtava1.ui.theme.Tehtava1Theme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            Tehtava1Theme {
+                CounterScreen()
+            }
+        }
+    }
+}
 
 @Composable
 fun CounterScreen() {
-    // Local state for counter, managed by Compose
-    val counter = remember { mutableStateOf(0) }
+    // Laskurin tila
+    var counter by remember { mutableStateOf(0) }
 
-    MaterialTheme {
-        Surface {
-            Column {
-                Text(
-                    text = "Counter: ${counter.value}",
-                    style = MaterialTheme.typography.bodyLarge // Use a valid typography style in Material3
-                )
-                Button(onClick = { counter.value++ }) {
-                    Text("Increase")
-                }
-                Button(onClick = { counter.value-- }) {
-                    Text("Decrease")
-                }
+    // Box-komponentti, joka keskittää sisällön
+    Box(
+        modifier = Modifier
+            .fillMaxSize()  // Box täyttää koko näytön
+            .padding(16.dp),  // Lisätään pieni marginaali reunoihin
+        contentAlignment = Alignment.Center  // Keskitetään sisältö
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally, // Keskittää sisällön vaakasuunnassa
+            verticalArrangement = Arrangement.spacedBy(20.dp),  // Lisää väliä komponenttien väliin
+            modifier = Modifier.fillMaxWidth()  // Column täyttää vaakasuunnassa koko ruudun
+        ) {
+            // Laskurin näyttö
+            Text(
+                text = "Counter: $counter",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+
+            // "Kasvata"-painike
+            Button(onClick = { counter++ }, modifier = Modifier.fillMaxWidth()) {
+                Text("Kasvata")
+            }
+
+            // "Pienennä"-painike
+            Button(onClick = { counter-- }, modifier = Modifier.fillMaxWidth()) {
+                Text("Pienennä")
             }
         }
     }
@@ -35,6 +62,8 @@ fun CounterScreen() {
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewCounterScreen() {
-    CounterScreen()
+fun DefaultPreview() {
+    Tehtava1Theme {
+        CounterScreen()
+    }
 }
