@@ -145,7 +145,6 @@ fun HomeScreen(navController: NavHostController) {
 }
 
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -162,11 +161,13 @@ class MainActivity : ComponentActivity() {
                                     Icon(Icons.Filled.Home, contentDescription = "Home")
                                 }
                                 IconButton(onClick = { navController.navigate("product_list") }) {
-                                    Icon(Icons.Filled.ShoppingCart, contentDescription = "Go to Products")
+                                    Icon(Icons.Filled.List, contentDescription = "Go to Products")
                                 }
                                 IconButton(onClick = { navController.navigate("shopping_list") }) {
-                                    Icon(Icons.Filled.List, contentDescription = "Go to Shopping List")
+                                    Icon(Icons.Filled.ShoppingCart, contentDescription = "Go to Shopping List")
                                 }
+
+
                             }
                         )
                     }
