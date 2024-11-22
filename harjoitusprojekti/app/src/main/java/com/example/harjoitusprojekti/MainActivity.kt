@@ -119,28 +119,46 @@ fun HomeScreen(navController: NavHostController) {
             .padding(16.dp),
         verticalArrangement = Arrangement.Top
     ) {
-        // Buttons for navigation
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Button(
-                onClick = { navController.navigate("product_list") },
-                modifier = Modifier.weight(1f).height(56.dp)
-            ) {
-                Text("Go to Products")
-            }
-            Button(
-                onClick = { navController.navigate("shopping_list") },
-                modifier = Modifier.weight(1f).height(56.dp)
-            ) {
-                Text("Go to Shopping List")
-            }
-        }
+        // Tervetuloa-teksti ja sovelluksen kuvaus
+        Text(
+            "Tervetuloa Fake Store -sovellukseen!",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
-        // Welcome Text
-        Spacer(modifier = Modifier.height(32.dp))
-        Text("Welcome to the Shopping App", style = MaterialTheme.typography.titleLarge)
+// Sovelluksen toiminnan kuvaus
+        Text(
+            "Fake Store -sovellus antaa sinun selata tuotteita, lisätä tuotteita ostoskoriin ja tarkastella ostoslistaa.",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            "Voit valita tuotteen, nähdä sen hinnan ja kuvan, ja lisätä sen ostoskoriisi, jonka myötä se siirtyy tallennettuna ostoslistaan.",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            "Ostoskorin tuotteet tallennetaan sovelluksessa ja se pysyy tallennettuna, vaikka käynnistäisit sovelluksen uudelleen.",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            "Ostoskorissa voit hallita tuotteita siten, että voit halutessasi poistaa tuotteen painamalla roskakori-ikonia.",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            "Sovellus on suunniteltu yksinkertaiseksi ja helppokäyttöiseksi ostosten tekemiseen.",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
+
+        // Tässä ei enää ole erillisiä painikkeita navigointiin
     }
 }
 
