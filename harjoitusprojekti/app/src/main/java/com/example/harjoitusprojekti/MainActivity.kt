@@ -43,6 +43,9 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.compose.ui.res.stringResource
+import java.util.Locale
+import androidx.compose.material.icons.filled.Translate
 
 
 import com.example.harjoitusprojekti.ProductListScreen
@@ -141,35 +144,45 @@ fun HomeScreen(navController: NavHostController) {
             .padding(16.dp),
         verticalArrangement = Arrangement.Top
     ) {
-        // Tervetuloteksti
         Spacer(modifier = Modifier.height(32.dp))
-        Text("Welcome to the Shopping App", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(id = R.string.home_title), style = MaterialTheme.typography.titleLarge)
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             val navController = rememberNavController()
+            var selectedLanguage by remember { mutableStateOf(AppLanguage.ENGLISH) }
+
             MaterialTheme {
                 Scaffold(
                     topBar = {
                         TopAppBar(
-                            title = { Text("Fake Store") },
+                            title = { Text(stringResource(id = R.string.app_name)) },
                             actions = {
-                                // Home-ikoni siirtää etusivulle
                                 IconButton(onClick = { navController.navigate("home") }) {
                                     Icon(Icons.Filled.Home, contentDescription = "Home")
                                 }
-                                // List-ikoni siirtää tuoteluetteloon
                                 IconButton(onClick = { navController.navigate("product_list") }) {
-                                    Icon(Icons.Filled.List, contentDescription = "Go to Product List")
+                                    Icon(Icons.Filled.List, contentDescription = "Product List")
                                 }
-                                // ShoppingCart-ikoni siirtää ostoslistalle
                                 IconButton(onClick = { navController.navigate("shopping_list") }) {
-                                    Icon(Icons.Filled.ShoppingCart, contentDescription = "Go to Shopping List")
+                                    Icon(Icons.Filled.ShoppingCart, contentDescription = "Shopping List")
+                                }
+                                IconButton(onClick = {
+                                    selectedLanguage = if (selectedLanguage == AppLanguage.ENGLISH) {
+                                        AppLanguage.FINNISH
+                                    } else {
+                                        AppLanguage.ENGLISH
+                                    }
+                                    setLanguage(this@MainActivity, selectedLanguage)  // Kielen vaihto
+                                }) {
+                                    Icon(Icons.Default.Translate, contentDescription = stringResource(R.string.switch_language))
                                 }
                             }
                         )
@@ -190,6 +203,23 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+// Päivitetään AppLanguage enum kielen määrittämiseksi
+enum class AppLanguage(val locale: Locale) {
+    ENGLISH(Locale("en")),
+    FINNISH(Locale("fi"))
+}
+
+// Kielen asettaminen: päivitys resurssit uudelle kielelle
+fun setLanguage(activity: ComponentActivity, language: AppLanguage) {
+    val locale = language.locale
+    Locale.setDefault(locale)
+    val config = activity.resources.configuration
+    config.setLocale(locale)
+    activity.resources.updateConfiguration(config, activity.resources.displayMetrics)
+    activity.recreate()  // Tämä päivittää Activityn ja UI:n
+
+}
 
 val imageKey = stringPreferencesKey("image_key")
 val titleKey = stringPreferencesKey("title_key")
