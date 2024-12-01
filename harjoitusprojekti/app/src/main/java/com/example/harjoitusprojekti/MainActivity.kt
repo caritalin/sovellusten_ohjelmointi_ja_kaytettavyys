@@ -4,14 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.NavHostController
@@ -27,38 +30,45 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.Preferences
+import kotlinx.coroutines.flow.map
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import kotlinx.coroutines.flow.map
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+
+
+import com.example.harjoitusprojekti.ProductListScreen
+
+
+
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.List
+
+import androidx.compose.material.icons.filled.ShoppingCart
+
+
 import androidx.compose.material.icons.Icons
+import coil.compose.rememberImagePainter  // Add this import for image loading
 import kotlinx.coroutines.launch
 import retrofit2.http.GET
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.Retrofit
+
 import androidx.compose.foundation.Image
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.ui.res.stringResource
-import android.content.res.Configuration
-import android.content.Context
-import java.util.Locale
-import androidx.compose.runtime.Composable
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.ui.platform.LocalContext
-import android.app.Activity
-
-
 
 
 // DataStore extension
-val ComponentActivity.dataStore: DataStore<Preferences> by preferencesDataStore(name = "shopping_list")
+val ComponentActivity.dataStore by preferencesDataStore(name = "shopping_list")
 
-val imageKey = stringPreferencesKey("image_key")
-val titleKey = stringPreferencesKey("title_key")
-val priceKey = doublePreferencesKey("price_key")
 
 // Shopping List Item
 data class ShoppingItem(
@@ -95,7 +105,7 @@ interface ApiService {
 suspend fun saveToDataStore(dataStore: DataStore<Preferences>, shoppingItem: ShoppingItem) {
     dataStore.edit { preferences ->
         preferences[titleKey] = shoppingItem.title
-        preferences[priceKey] = shoppingItem.price  // Corrected for double type
+        preferences[priceKey] = shoppingItem.price
         preferences[imageKey] = shoppingItem.image
     }
 }
@@ -105,7 +115,7 @@ suspend fun saveToDataStore(dataStore: DataStore<Preferences>, shoppingItem: Sho
 fun loadFromDataStore(dataStore: DataStore<Preferences>): Flow<List<ShoppingItem>> {
     return dataStore.data.map { preferences ->
         val title = preferences[titleKey]
-        val price = preferences[priceKey] ?: 0.0
+        val price = preferences[priceKey]
         val image = preferences[imageKey] ?: "https://path_to_default_image.com"
         if (title != null && price != null) {
             listOf(ShoppingItem(id = 0, title = title, price = price.toDouble(), image = image))
@@ -114,6 +124,12 @@ fun loadFromDataStore(dataStore: DataStore<Preferences>): Flow<List<ShoppingItem
         }
     }
 }
+
+
+
+
+
+
 
 
 // Home Screen
@@ -125,121 +141,73 @@ fun HomeScreen(navController: NavHostController) {
             .padding(16.dp),
         verticalArrangement = Arrangement.Top
     ) {
-        // Käytetään stringResourcea merkkijonojen hakemiseen
-        Text(
-            text = stringResource(id = R.string.welcome_message),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        // Sovelluksen toiminnan kuvaus
-        Text(
-            text = stringResource(id = R.string.app_description),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Text(
-            text = stringResource(id = R.string.cart_description),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Text(
-            text = stringResource(id = R.string.manage_cart),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Text(
-            text = stringResource(id = R.string.simple_app_description),
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
+        // Tervetuloteksti
+        Spacer(modifier = Modifier.height(32.dp))
+        Text("Welcome to the Shopping App", style = MaterialTheme.typography.titleLarge)
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            var language by remember { mutableStateOf("en") } // State for language selection
-            val context = LocalContext.current
-
             MaterialTheme {
                 Scaffold(
                     topBar = {
                         TopAppBar(
-                            title = { Text(stringResource(id = R.string.app_name)) },
+                            title = { Text("Fake Store") },
                             actions = {
+                                // Home-ikoni siirtää etusivulle
                                 IconButton(onClick = { navController.navigate("home") }) {
-                                    Icon(Icons.Filled.Home, contentDescription = stringResource(id = R.string.home))
+                                    Icon(Icons.Filled.Home, contentDescription = "Home")
                                 }
+                                // List-ikoni siirtää tuoteluetteloon
                                 IconButton(onClick = { navController.navigate("product_list") }) {
-                                    Icon(Icons.Filled.List, contentDescription = stringResource(id = R.string.go_to_products))
+                                    Icon(Icons.Filled.List, contentDescription = "Go to Product List")
                                 }
+                                // ShoppingCart-ikoni siirtää ostoslistalle
                                 IconButton(onClick = { navController.navigate("shopping_list") }) {
-                                    Icon(Icons.Filled.ShoppingCart, contentDescription = stringResource(id = R.string.go_to_shopping_list))
-                                }
-                                IconButton(onClick = {
-                                    language = if (language == "en") "fi" else "en"
-                                    changeLanguage(context, language)
-                                }) {
-                                    Icon(Icons.Filled.Language, contentDescription = stringResource(id = R.string.change_language))
+                                    Icon(Icons.Filled.ShoppingCart, contentDescription = "Go to Shopping List")
                                 }
                             }
                         )
                     }
                 ) { innerPadding ->
-                    // Päivitetään käyttöliittymä heti kun kieli muuttuu
-                    CompositionLocalProvider(LocalContext provides context.createLocalizedContext(language)) {
-                        NavHost(
-                            navController = navController,
-                            startDestination = "home",
-                            modifier = Modifier.padding(innerPadding)
-                        ) {
-                            composable("home") { HomeScreen(navController) }
-                            composable("product_list") { ProductListScreen(navController) }
-                            composable("shopping_list") { ShoppingListScreen() }
-                        }
+                    NavHost(
+                        navController = navController,
+                        startDestination = "home",
+                        modifier = Modifier.padding(innerPadding)
+                    ) {
+                        composable("home") { HomeScreen(navController) }
+                        composable("shopping_list") { ShoppingListScreen(this@MainActivity) }
+                        composable("product_list") { ProductListScreen(navController) }
                     }
                 }
             }
         }
     }
-
-    private fun Context.createLocalizedContext(language: String): Context {
-        val locale = Locale(language)
-        val config = Configuration(this.resources.configuration)
-        config.setLocale(locale)
-        return this.createConfigurationContext(config)
-    }
-
-    private fun changeLanguage(context: Context, language: String) {
-        Locale.setDefault(Locale(language))
-        val config = Configuration(context.resources.configuration)
-        config.setLocale(Locale(language))
-        context.resources.updateConfiguration(config, context.resources.displayMetrics)
-    }
 }
 
+
+val imageKey = stringPreferencesKey("image_key")
+val titleKey = stringPreferencesKey("title_key")
+val priceKey = doublePreferencesKey("price_key")
 
 
 
 @Composable
-fun ShoppingListScreen() {
+fun ShoppingListScreen(activity: ComponentActivity) {
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current as ComponentActivity // Hanki aktiivisuus kontekstista
+    val context = LocalContext.current
+    val activity = context as? ComponentActivity
 
     var shoppingList by remember { mutableStateOf<List<ShoppingItem>>(emptyList()) }
 
-    // Lataa ostoslista DataStoresta
+    // Ladataan ostoslista DataStoresta
     LaunchedEffect(Unit) {
-        loadFromDataStore(context.dataStore).collect { items ->
+        loadFromDataStore(activity?.dataStore ?: return@LaunchedEffect).collect { items ->
             shoppingList = items
         }
     }
@@ -262,6 +230,7 @@ fun ShoppingListScreen() {
                             .padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        // Tuotteen kuva
                         Image(
                             painter = rememberImagePainter(item.image),
                             contentDescription = item.title,
@@ -271,6 +240,7 @@ fun ShoppingListScreen() {
                         )
                         Spacer(modifier = Modifier.width(16.dp))
 
+                        // Tuotteen tiedot: nimi, hinta ja kuvaus
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = item.title,
@@ -278,18 +248,20 @@ fun ShoppingListScreen() {
                                 maxLines = 1,
                             )
                             Text(
-                                text = "$${item.price}",
+                                text = "$${item.price}", // Näyttää hinnan
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.secondary
                             )
                         }
 
+                        // Roskakori-painike
                         IconButton(
                             onClick = {
+                                // Poista tuote ostoslistalta ja DataStoresta
                                 coroutineScope.launch {
                                     val updatedList = shoppingList.filterNot { it == item }
                                     shoppingList = updatedList
-                                    updatedList.forEach { saveToDataStore(context.dataStore, it) }
+                                    updatedList.forEach { saveToDataStore(activity?.dataStore ?: return@forEach, it) }
                                 }
                             }
                         ) {
@@ -301,7 +273,6 @@ fun ShoppingListScreen() {
         }
     }
 }
-
 
 
 @Composable
@@ -378,14 +349,6 @@ fun ProductListScreen(navController: NavHostController) {
                         ) {
                             Icon(Icons.Filled.ShoppingCart, contentDescription = "Add to Cart")
                         }
-                    }
-
-                    // View Photo -nappi
-                    Button(onClick = {
-                        val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(product.image)) // Käytetään tuotteen kuvan URL-osoitetta
-                        context.startActivity(webIntent) // Käynnistetään intent
-                    }) {
-                        Text("View Photo")
                     }
                 }
             }
