@@ -11,88 +11,138 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.harjoitusprojekti.models.Product
-import com.example.harjoitusprojekti.models.ShoppingItem
 import com.example.harjoitusprojekti.RetrofitInstance
-import com.example.harjoitusprojekti.utils.saveToDataStore
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.compose.ui.Alignment
+import android.content.Intent
+import com.example.harjoitusprojekti.R
+import androidx.compose.ui.res.stringResource
 import android.content.Context
+import androidx.compose.material3.Text
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.core.DataStore
 
-// In your MainActivity or relevant Activity
-val Context.dataStore by preferencesDataStore(name = "shopping_data")
+import com.example.harjoitusprojekti.models.ShoppingItem
+import com.example.harjoitusprojekti.utils.saveToDataStore
 
+import kotlinx.coroutines.launch
+import androidx.datastore.preferences.core.Preferences
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductListScreen(navController: NavHostController) {
+fun ProductListScreen(navController: NavHostController, dataStore: DataStore<Preferences>) {
     val products = remember { mutableStateOf<List<Product>>(emptyList()) }
     val isLoading = remember { mutableStateOf(true) }
     val errorMessage = remember { mutableStateOf<String?>(null) }
-    val isAddingToCart = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
-    // LaunchedEffect joka lataa tuotteet
+    // Lataa tuotteet
     LaunchedEffect(Unit) {
         try {
             isLoading.value = true
-            products.value = RetrofitInstance.api.getProducts()
+            val fetchedProducts = RetrofitInstance.api.getProducts()
+            products.value = fetchedProducts  // Ensure we only set products after data is fetched
             isLoading.value = false
         } catch (e: Exception) {
             isLoading.value = false
-            errorMessage.value = e.message
+            errorMessage.value = e.message // Safe assignment of error message
         }
     }
 
-    // UI-koodisi pysyy samana
-    if (isLoading.value) {
-        CircularProgressIndicator(modifier = Modifier.fillMaxSize().wrapContentSize())
-    } else if (errorMessage.value != null) {
-        Text(text = "Error: ${errorMessage.value}", color = MaterialTheme.colorScheme.error)
-    } else {
-        LazyColumn(modifier = Modifier.padding(16.dp)) {
-            items(products.value) { product ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Row(modifier = Modifier.padding(16.dp)) {
-                        Image(
-                            painter = rememberAsyncImagePainter(model = product.image),
-                            contentDescription = product.title,
-                            modifier = Modifier.size(80.dp)
-                        )
+    Column {
+        TopAppBar(
+            title = { Text(text = stringResource(id = R.string.products_screen_title)) },
+        )
 
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(text = product.title, style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                text = "${product.price} USD",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-
-                        // Lisää tuotteita ostoskoriin käyttäen LaunchedEffect
-                        IconButton(
-                            onClick = {
-                                // LaunchedEffect suoraan onClickissä
-                                isAddingToCart.value = true
-                            }
+        if (isLoading.value) {
+            CircularProgressIndicator(modifier = Modifier.fillMaxSize().wrapContentSize())
+        } else if (errorMessage.value != null) {
+            val errorMsg = errorMessage.value ?: stringResource(id = R.string.error_message_default)
+            Text(text = stringResource(id = R.string.error_message, errorMsg), color = MaterialTheme.colorScheme.error)
+        } else {
+            LazyColumn(modifier = Modifier.padding(16.dp)) {
+                items(products.value) { product ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
                         ) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = "Add to Cart")
-                        }
-
-                        // LaunchedEffect joka suoritetaan, kun tuote lisätään ostoskoriin
-                        if (isAddingToCart.value) {
-                            LaunchedEffect(isAddingToCart.value) {
-                                val shoppingItem = ShoppingItem(
-                                    id = product.id,
-                                    title = product.title,
-                                    price = product.price,
-                                    image = product.image
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(model = product.image),
+                                    contentDescription = product.title,
+                                    modifier = Modifier
+                                        .size(80.dp)
+                                        .align(Alignment.CenterHorizontally)
                                 )
-                                saveToDataStore(navController.context.dataStore, shoppingItem)
-                                isAddingToCart.value = false
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Button(
+                                    onClick = {
+                                        openUrlInBrowser(navController.context, product.image)
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.CenterHorizontally)
+                                        .height(32.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text(
+                                        text = stringResource(id = R.string.view_photo),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = product.title,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Text(
+                                        text = "${product.price} USD",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+
+                                IconButton(
+                                    onClick = {
+                                        // Call the suspend function within a coroutine scope
+                                        val shoppingItem = ShoppingItem(
+                                            id = product.id,
+                                            title = product.title,
+                                            price = product.price,
+                                            image = product.image
+                                        )
+                                        coroutineScope.launch {
+                                            saveToDataStore(dataStore, shoppingItem)
+                                        }
+                                        navController.navigate("shopping_list")
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Default.ShoppingCart,
+                                        contentDescription = stringResource(id = R.string.add_to_cart)
+                                    )
+                                }
                             }
                         }
                     }
@@ -100,4 +150,11 @@ fun ProductListScreen(navController: NavHostController) {
             }
         }
     }
+}
+
+fun openUrlInBrowser(context: Context, url: String) {
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        data = android.net.Uri.parse(url)
+    }
+    context.startActivity(intent)
 }

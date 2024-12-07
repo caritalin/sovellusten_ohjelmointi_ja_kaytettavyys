@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.harjoitusprojekti.R
 
 
 @Composable
@@ -19,7 +20,7 @@ fun HomeScreen(navController: NavHostController) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Home Screen", // Kovakoodattu teksti
+            text = stringResource(id = R.string.home_screen_title),
             style = MaterialTheme.typography.headlineMedium
         )
     }

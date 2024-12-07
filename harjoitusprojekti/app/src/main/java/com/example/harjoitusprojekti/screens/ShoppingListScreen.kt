@@ -16,8 +16,11 @@ import com.example.harjoitusprojekti.models.ShoppingItem
 import com.example.harjoitusprojekti.utils.loadFromDataStore
 import kotlinx.coroutines.launch
 import com.example.harjoitusprojekti.utils.removeFromDataStore
+import com.example.harjoitusprojekti.dataStore
+import androidx.compose.ui.res.stringResource
+import com.example.harjoitusprojekti.R
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingListScreen(activity: ComponentActivity) {
     val shoppingList = remember { mutableStateOf<List<ShoppingItem>>(emptyList()) }
@@ -29,29 +32,34 @@ fun ShoppingListScreen(activity: ComponentActivity) {
         }
     }
 
-    LazyColumn(modifier = Modifier.padding(16.dp)) {
-        items(shoppingList.value) { item ->
-            Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                Row(modifier = Modifier.padding(16.dp)) {
-                    Image(
-                        painter = rememberAsyncImagePainter(model = item.image),
-                        contentDescription = item.title,
-                        modifier = Modifier.size(80.dp)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(text = item.title, style = MaterialTheme.typography.bodyLarge)
-                        Text(text = "${item.price} USD", style = MaterialTheme.typography.bodyMedium)
-                    }
-                    IconButton(onClick = {
-                        coroutineScope.launch {
-                            // Poista tuote DataStoresta ja päivitä lista
-                            removeFromDataStore(activity.dataStore, item)
-                            val updatedList = shoppingList.value.filterNot { it == item }
-                            shoppingList.value = updatedList
+    Column {
+        TopAppBar(
+            title = { Text(text = stringResource(id = R.string.shopping_list_screen_title)) },
+        )
+
+        LazyColumn(modifier = Modifier.padding(16.dp)) {
+            items(shoppingList.value) { item ->
+                Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                    Row(modifier = Modifier.padding(16.dp)) {
+                        Image(
+                            painter = rememberAsyncImagePainter(model = item.image),
+                            contentDescription = item.title,
+                            modifier = Modifier.size(80.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = item.title, style = MaterialTheme.typography.bodyLarge)
+                            Text(text = "${item.price} USD", style = MaterialTheme.typography.bodyMedium)
                         }
-                    }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete Item")
+                        IconButton(onClick = {
+                            coroutineScope.launch {
+                                removeFromDataStore(activity.dataStore, item)
+                                val updatedList = shoppingList.value.filterNot { it == item }
+                                shoppingList.value = updatedList
+                            }
+                        }) {
+                            Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete_item))
+                        }
                     }
                 }
             }
