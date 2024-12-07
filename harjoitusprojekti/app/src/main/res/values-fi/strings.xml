@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Feikkikauppa</string>
+    <string name="home_screen_title">Koti</string>
+    <string name="products_screen_title">Tuotteet</string>
+    <string name="shopping_list_screen_title">Ostoslista</string>
+    <string name="view_photo">Näytä kuva</string>
+    <string name="add_to_cart">Lisää koriin</string>
+    <string name="delete_item">Poista tuote</string>
+    <string name="loading">Ladataan</string>
+    <string name="error_message">Virhe: %1$s</string>
+    <string name="error_message_default">Odottamaton virhe</string>
+</resources>
