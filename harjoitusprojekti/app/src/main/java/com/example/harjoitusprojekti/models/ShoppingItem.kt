@@ -6,3 +6,5 @@ data class ShoppingItem(
     val price: Double,
     val image: String
 )
+
+
