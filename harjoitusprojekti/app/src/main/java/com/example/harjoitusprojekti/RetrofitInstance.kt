@@ -1,9 +1,9 @@
 package com.example.harjoitusprojekti
 
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
@@ -22,3 +22,4 @@ object RetrofitInstance {
 
     val api: ApiService = retrofit.create(ApiService::class.java)
 }
+
